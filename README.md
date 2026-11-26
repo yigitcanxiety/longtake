@@ -53,8 +53,8 @@ The same oracle fails equal shot lengths, no stillness, clipped audio, fast move
 ## Install
 
 ```
-git clone https://github.com/you/longtake.git ~/.claude/skills/longtake   # Claude Code
-git clone https://github.com/you/longtake.git ~/.agents/skills/longtake   # other agents that read skills
+git clone https://github.com/yigitcanxiety/longtake.git ~/.claude/skills/longtake   # Claude Code
+git clone https://github.com/yigitcanxiety/longtake.git ~/.agents/skills/longtake   # other agents that read skills
 ```
 
 ```
