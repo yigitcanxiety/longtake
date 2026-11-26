@@ -210,10 +210,10 @@ function paint(t) {
   cards.forEach((el, i) => { const p = cardPose(i, t); P.set('card' + i, p); });
 
   // the line of display type
-  const lineIn = sstep(4.55, 4.8, t), lineOut = sstep(6.2, 6.6, t);
+  const lineIn = sstep(5.18, 5.42, t), lineOut = sstep(6.28, 6.6, t);
   P.set('line', { x: 260, y: 470 - 20 * lineOut, op: lineIn * (1 - lineOut), s: 1, blur: 8 * lineOut });
   [...line.children].forEach((s, i) => {
-    const w = LT.rise(t, 4.75 + i * 0.26, { bounce: 0.3, omega: 20, dist: 40 });
+    const w = LT.rise(t, 5.34 + i * 0.2, { bounce: 0.3, omega: 20, dist: 40 });
     s.style.opacity = w.op; s.style.transform = `translateY(${w.y.toFixed(1)}px) scale(${w.s.toFixed(3)})`;
   });
 

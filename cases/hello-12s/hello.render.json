@@ -9,7 +9,7 @@
  "shutter": 180.0,
  "samples": "adaptive",
  "samples_per_moving_frame": {
-  "4": 265,
+  "4": 268,
   "5": 13,
   "6": 4,
   "7": 11,
@@ -25,9 +25,9 @@
  },
  "workers": 6,
  "frames": 360,
- "still_frames": 53,
- "cut_frames": 67,
- "captures": 1677,
- "seconds": 53.1,
+ "still_frames": 50,
+ "cut_frames": 61,
+ "captures": 1683,
+ "seconds": 51.0,
  "final": false
 }
