@@ -18,7 +18,7 @@ At every section boundary:
 
 | grammar | what it looks like | tool |
 | --- | --- | --- |
-| **become** | the shape is the next shape: caret → rule, chip → card, card → page | `LT.morph`, `LT.stretchTo` |
+| **become** | the shape is the next shape: caret → rule, chip → card, card → page | `LT.morph` (`axis` for one dimension) |
 | **open** | a stage grows out of the subject until it is the frame | `LT.bloom` |
 | **enter** | the camera pushes into a surface and its inside is the next scene | `LT.dive` |
 | **ride** | the subject travels along the thing that survives | `LT.arc`, `LT.fold`, `LT.shuffle` |

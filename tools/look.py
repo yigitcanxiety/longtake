@@ -140,7 +140,8 @@ def apply(name, comp, cjk=None):
     open(out, "w").write("\n".join(js) + "\n")
     if 'id="lt-look"' not in text:
         text = text.replace("<head>", f'<head>\n<style id="lt-look">:root{{{props}}}</style>\n', 1)
-        text = text.replace("<script", '<script src="look.js"></script>\n<script', 1)
+        if 'src="look.js"' not in text:
+            text = text.replace("<script", '<script src="look.js"></script>\n<script', 1)
         open(comp, "w", encoding="utf-8").write(text)
     print(f"applied {look_name} → {out}")
     if warn:
