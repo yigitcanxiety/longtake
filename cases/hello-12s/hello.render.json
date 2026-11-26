@@ -1,0 +1,33 @@
+{
+ "comp": "/Volumes/harici/opencode/longtake/cases/hello-12s/comp.html",
+ "fps": 30,
+ "scale": 1,
+ "size": [
+  1920,
+  1080
+ ],
+ "shutter": 180.0,
+ "samples": "adaptive",
+ "samples_per_moving_frame": {
+  "4": 265,
+  "5": 13,
+  "6": 4,
+  "7": 11,
+  "8": 2,
+  "9": 2,
+  "12": 1,
+  "17": 1,
+  "18": 1,
+  "19": 1,
+  "31": 1,
+  "42": 1,
+  "43": 4
+ },
+ "workers": 6,
+ "frames": 360,
+ "still_frames": 53,
+ "cut_frames": 67,
+ "captures": 1677,
+ "seconds": 53.1,
+ "final": false
+}

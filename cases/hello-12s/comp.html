@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<!-- longtake case 1 · hello-12s — one line is enough. The rule is the caret, the shelf, the baseline,
+     the underline. It survives every boundary; the film is its walk. -->
+<html lang="en">
+<head>
+<style id="lt-look">:root{--ground:#10141a;--deep:#070a0e;--card:#171d26;--line:#28303c;--mute:#93a0b4;--ink:#e9eef6;--accent:#c8ff4d;--accent2:#ff8a5c;}</style>
+
+<meta charset="utf-8">
+<title>longtake · hello-12s</title>
+<style>
+:root{--ground:#10141a;--deep:#070a0e;--card:#171d26;--line:#28303c;--mute:#93a0b4;--ink:#e9eef6;--accent:#c8ff4d;--accent2:#ff8a5c}
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:var(--ground)}
+body{font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+#stage{position:absolute;inset:0;overflow:hidden;background:
+  radial-gradient(120% 90% at 50% 118%, rgba(200,255,77,.10), transparent 55%),
+  linear-gradient(180deg,#141a22 0%,#10141a 46%,#0a0e13 100%)}
+#lat{position:absolute;inset:0;opacity:.75}
+.bar{background:var(--accent);border-radius:2px;will-change:transform,width,height;box-shadow:0 0 24px rgba(200,255,77,.25)}
+#rule{background:var(--ink);box-shadow:none}
+#cap{font:450 34px/1.35 var(--mono,'Geist Mono',monospace);color:var(--ink);white-space:pre}
+#cap i{display:inline-block;width:2px;height:36px;background:var(--accent);vertical-align:-6px;margin-left:2px}
+#line{font:300 108px/1.05 var(--display,'Fraunces',serif);letter-spacing:-.015em;white-space:nowrap}
+#line u{text-decoration:none;position:relative}
+#mark{font:300 168px/1 var(--display,'Fraunces',serif);letter-spacing:-.025em;white-space:nowrap}
+#mark span{display:inline-block;transform-origin:50% 92%}
+#tag{font:450 27px/1 var(--mono,'Geist Mono',monospace);color:var(--mute);letter-spacing:.02em;white-space:nowrap}
+#tag b{color:var(--accent);font-weight:450}
+#hit{font:800 150px/1 var(--display,'Archivo',sans-serif);letter-spacing:-.01em;text-transform:uppercase;white-space:nowrap}
+#credit{font:400 19px/1 var(--mono,'Geist Mono',monospace);color:var(--mute);letter-spacing:.06em}
+.card{background:linear-gradient(160deg,#20303c,#121a22 62%);border:1px solid #2c3a46;border-radius:14px;
+  box-shadow:0 30px 70px -30px #000;will-change:transform,width,height;overflow:hidden;transform-origin:50% 100%}
+.card em{position:absolute;left:16px;top:12px;font:500 15px/1 var(--mono,'Geist Mono',monospace);color:#9fb4c8;font-style:normal}
+.card s{position:absolute;left:14px;right:14px;bottom:14px;height:6px;border-radius:3px;background:linear-gradient(90deg,#3d5568,#6d879c);text-decoration:none;display:block}
+#hud{position:absolute;right:12px;bottom:8px;font:12px var(--mono,monospace);color:#d33;display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="lat" width="1920" height="1080"></canvas>
+  <div id="line"></div>
+  <div id="cap"></div>
+  <div id="rule" class="bar"></div>
+  <div id="hit"></div>
+  <div id="mark"></div>
+  <div id="tag">one take · <b>no cuts</b> · MIT</div>
+  <div id="credit">sources, not just films — github.com/you/longtake</div>
+  <div id="hud"></div>
+</div>
+<script src="look.js"></script>
+<script src="../../lib/anim.js"></script>
+<script src="../../lib/paint.js"></script>
+<script src="look.js"></script>
+<script>
+const W = 1920, H = 1080, FPS = 30, DUR = 12;
+const { clamp, mix, prog, C, s5, sstep } = LT;
+const P = LTX.mount(document.getElementById('stage'));
+const $ = id => document.getElementById(id);
+
+window.__meta = {
+  dur: DUR, fps: FPS, w: W, h: H,
+  cuts: [8.0, 8.18, 8.36, 8.54],
+  mustStay: { rule: [1.05, 10.4, 'whole'], mark: [6.5, 12, 'whole'] },
+};
+
+// ── layers ────────────────────────────────────────────────────────────────
+const CAPTION = 'one line is enough';
+const cap = $('cap');
+P.add('cap', cap, { key: 'cap', w: 900, h: 46 });
+const capText = document.createElement('span'); const caret = document.createElement('i');
+cap.append(capText, caret);
+
+const rule = $('rule');
+P.add('rule', rule, { key: 'rule', w: 2, h: 44 });
+
+const line = $('line');
+const LINE_WORDS = ['every', 'beat', 'is', 'carried.'];
+LINE_WORDS.forEach((w, i) => { const s = document.createElement('span'); s.textContent = w + (i < 3 ? '\u00a0' : ''); s.style.display = 'inline-block'; line.appendChild(s); });
+P.add('line', line, { key: 'line', w: 1500, h: 110 });
+
+const cards = [0, 1, 2].map(i => {
+  const d = document.createElement('div');
+  d.className = 'card';
+  d.innerHTML = `<em>0${i + 1}</em><s style="width:${40 + i * 22}%"></s>`;
+  P.add('card' + i, d, { key: 'card' + i, w: 300, h: 190 });
+  return d;
+});
+
+const mark = $('mark');
+[...'longtake'].forEach(ch => { const s = document.createElement('span'); s.textContent = ch; mark.appendChild(s); });
+const LETTERS = [...mark.children];
+P.add('mark', mark, { key: 'mark', w: 760, h: 180 });
+
+const hit = $('hit'); P.add('hit', hit, { key: 'hit', w: 1200, h: 160 });
+const tag = $('tag'); P.add('tag', tag, { key: 'tag', w: 700, h: 30 });
+const credit = $('credit'); P.add('credit', credit, { key: 'credit', w: 760, h: 24 });
+
+// ── camera: keys, a hand, tremor on the hits ──────────────────────────────
+const cam = LT.rig([
+  { t: 0.0, x: 960, y: 520, zoom: 1.06 },
+  { t: 1.15, x: 940, y: 520, zoom: 1.03 },
+  { t: 2.0, x: 900, y: 500, zoom: 1.05 },
+  { t: 2.9, x: 905, y: 505, zoom: 1.05 },
+  { t: 4.3, x: 940, y: 470, zoom: 1.075 },
+  { t: 4.4, x: 960, y: 470, zoom: 1.02 },
+  { t: 5.0, x: 960, y: 470, zoom: 1.0 },
+  { t: 5.9, x: 960, y: 470, zoom: 1.0 },
+  { t: 6.6, x: 960, y: 600, zoom: 1.04 },
+  { t: 6.9, x: 960, y: 610, zoom: 1.05 },
+  { t: 7.4, x: 960, y: 610, zoom: 1.05 },
+  { t: 8.0, x: 960, y: 570, zoom: 1.0 },
+  { t: 9.2, x: 960, y: 560, zoom: 1.01 },
+  { t: 10.4, x: 960, y: 560, zoom: 1.01 },
+  { t: 10.9, x: 960, y: 570, zoom: 1.02 },
+  { t: 11.3, x: 960, y: 550, zoom: 1.0 },
+  { t: 12.0, x: 960, y: 550, zoom: 1.0 },
+], { W, H, float: 0.7, hits: [[8.0, 13, 8], [8.18, 10, 9], [8.36, 10, 9], [8.54, 8, 10]] });
+
+// ── beats ─────────────────────────────────────────────────────────────────
+window.__beats = [
+  { t: 1.32, carry: 'rule', note: 'the caret stretches into the rule' },
+  { t: 1.9, carry: 'rule', note: 'the rule thickens into the shelf' },
+  { t: 2.02, carry: 'card0', note: 'cards drop onto the shelf' },
+  { t: 4.86, carry: 'card0', note: 'cards fold into ticks on the rule' },
+  { t: 6.72, carry: 'rule', note: 'the rule becomes the underline, the letters drop onto it' },
+  { t: 8.0, carry: 'rule', note: 'the underline snaps to each hit' },
+  { t: 8.18, carry: 'rule', hard: true },
+  { t: 8.36, carry: 'rule', hard: true },
+  { t: 8.54, carry: 'rule', hard: true },
+  { t: 9.2, carry: 'rule', note: 'the underline snaps back under the wordmark' },
+  { t: 10.95, carry: 'rule', note: 'the rule drops into a closing stroke' },
+];
+
+// ── painting ──────────────────────────────────────────────────────────────
+const HITS = [[8.0, 'no cuts'], [8.18, 'no fades'], [8.36, 'no slides'], [8.54, 'one take']];
+const CAP_X = 776, CAP_Y = 432;
+const RULE_A = { x: 760, y: 470, w: 2, h: 44, r: 2 };
+const RULE_B = { x: 250, y: 588, w: 1420, h: 3, r: 1.5 };
+const SHELF = { x: 300, y: 640, w: 1320, h: 5, r: 2 };
+const BASE = { x: 250, y: 640, w: 1420, h: 3, r: 1.5 };
+
+function ruleBox(t) {
+  let o = LT.morph(t, 1.15, 1.62, RULE_A, RULE_B, { curve: C.snap });
+  if (t >= 1.62) o = LT.morph(t, 1.7, 2.05, RULE_B, SHELF, { curve: C.drift });
+  if (t >= 2.05) o = LT.morph(t, 4.4, 4.95, SHELF, BASE, { curve: C.glide });
+  const markW = mark.offsetWidth || 700;
+  // 6.6 → underline under the wordmark, width follows the word
+  const wk = C.snap(prog(t, 6.6, 7.05));
+  o = lerpBox(o, { x: (W - markW) / 2, y: 806, w: markW, h: 4 }, wk);
+  // burst: the underline snaps to each hit's width
+  const hits = LT.flip(t, HITS);
+  if (t >= 8.0 && t < 9.05) {
+    const k = C.snap(prog(t, 8.0, 8.08));
+    const hw = (hit.offsetWidth || 700) + 24;
+    o = lerpBox(o, { x: (W - hw) / 2, y: 632, w: hw, h: 7 }, k);
+  }
+  // 9.05 → back under the wordmark; 10.9 → closing stroke
+  if (t >= 9.05) o = lerpBox(o, { x: (W - markW) / 2, y: 806, w: markW, h: 4 }, C.snap(prog(t, 9.05, 9.4)));
+  if (t >= 10.9) o = lerpBox(o, { x: (W - 210) / 2, y: 962, w: 210, h: 5 }, C.snap(prog(t, 10.9, 11.35)));
+  return o;
+}
+function lerpBox(a, b, k) { return { x: mix(a.x, b.x, k), y: mix(a.y, b.y, k), w: mix(a.w, b.w, k), h: mix(a.h, b.h, k), r: mix(a.r, b.r, k) }; }
+
+function cardPose(i, t) {
+  const cx = [400, 890, 1380][i];
+  const dropT = 1.95 + i * 0.17;
+  const land = LT.hit(t, dropT, { sx: 0.2, sy: 0.26, decay: 9 });
+  const dropK = LT.spring(t - dropT + 0.22, { bounce: 0.25, omega: 16 });
+  const y0 = mix(210, 450, Math.min(1, dropK));
+  // lean while the shelf holds
+  const lean = Math.sin((t - 2.6) * 1.6 + i * 1.1) * 0.02 * sstep(2.6, 3.0, t) * (1 - sstep(4.3, 4.7, t));
+  // fold into a tick on the rule
+  const fk = C.drift(prog(t, 4.75 + i * 0.06, 5.35 + i * 0.06));
+  const tickX = [600, 960, 1320][i];
+  return {
+    x: mix(cx - 150, tickX - 13, fk), y: mix(y0, 632, fk),
+    w: mix(300, 26, fk), h: mix(190, 6, fk),
+    rot: lean,
+    sx: 1 + land.sx * 0 + (fk > 0.98 ? 0 : 0), sy: 1 - land.sy * 0.12,
+    op: clamp((t - (dropT - 0.3)) * 5) * (t < 6.6 ? 1 - sstep(6.2, 6.6, t) : 0),
+  };
+}
+
+function paint(t) {
+  const c = cam(t);
+  P.cam(c);
+
+  // lattice, farther back, on screen through the camera
+  const g = LT.grid(c, { depth: 1.4, spacing: 64, px: 1.2, W, H });
+  const cv = $('lat'), ctx = cv.getContext('2d');
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
+  ctx.setTransform(...g.matrix);
+  ctx.fillStyle = 'rgba(147,160,180,.28)';
+  for (let x = g.x0; x <= g.x1; x += g.spacing) for (let y = g.y0; y <= g.y1; y += g.spacing) {
+    ctx.beginPath(); ctx.arc(x, y, g.r, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // the rule
+  const b = ruleBox(t);
+  P.set('rule', { x: b.x, y: b.y, w: b.w, h: b.h, rot: 0, op: t > 0.12 ? 1 : 0, clip: '' });
+
+  // caption: typed, then muted and lifted
+  const typed = LT.typeIn(t, 0.38, CAPTION, { cps: 34 });
+  capText.textContent = typed.shown;
+  caret.style.opacity = typed.caret;
+  const capOut = sstep(1.5, 1.95, t);
+  const capGone = sstep(6.1, 6.5, t);
+  P.set('cap', { x: CAP_X, y: CAP_Y - 100 * capOut, op: t > 0.3 ? (1 - capGone) : 0, s: 1 - 0.5 * capOut, blur: 6 * capOut + 8 * capGone });
+
+  // cards
+  cards.forEach((el, i) => { const p = cardPose(i, t); P.set('card' + i, p); });
+
+  // the line of display type
+  const lineIn = sstep(4.55, 4.8, t), lineOut = sstep(6.2, 6.6, t);
+  P.set('line', { x: 260, y: 470 - 20 * lineOut, op: lineIn * (1 - lineOut), s: 1, blur: 8 * lineOut });
+  [...line.children].forEach((s, i) => {
+    const w = LT.rise(t, 4.75 + i * 0.26, { bounce: 0.3, omega: 20, dist: 40 });
+    s.style.opacity = w.op; s.style.transform = `translateY(${w.y.toFixed(1)}px) scale(${w.s.toFixed(3)})`;
+  });
+
+  // wordmark letters
+  const markIn = (t >= 6.55 && t < 8.0) || (t >= 9.02 && t < 12);
+  const markOp = t >= 8.0 && t < 9.02 ? 0.1 : markIn ? clamp(sstep(9.02, 9.12, t) + (t < 8 ? 1 : 0)) : 0;
+  const mw = mark.offsetWidth || 760;
+  P.set('mark', { x: (W - mw) / 2, y: 600, op: markOp });
+  LETTERS.forEach((s, i) => {
+    const d = LT.drop(t, 6.6, i, { stagger: 0.045, bounce: 0.42 });
+    s.style.opacity = d.op;
+    s.style.transform = `translateY(${d.y.toFixed(1)}px) scale(${(1 + d.sq * 0.55).toFixed(4)},${(1 - d.sq).toFixed(4)})`;
+  });
+
+  // burst words
+  const h = LT.flip(t, HITS);
+  const live = t >= 8.0 && t < 9.05;
+  hit.textContent = h.text;
+  const hs = LT.spring(t - (h.i >= 0 ? HITS[h.i][0] : 0), { bounce: 0.3, omega: 30 });
+  P.set('hit', { x: (W - (hit.offsetWidth || 800)) / 2, y: 458, op: live ? clamp(hs * 6) : 0, s: 0.92 + 0.08 * hs, blur: live ? 0 : 8 });
+
+  // tagline + credit
+  const tr = LT.rise(t, 7.15, { bounce: 0.25, omega: 18, dist: 20, s0: 1, ds: 0 });
+  P.set('tag', { x: (W - (tag.offsetWidth || 620)) / 2, y: 868, op: tr.op * (1 - sstep(7.95, 8.0, t)) + (t >= 9.2 ? sstep(9.2, 9.6, t) : 0) });
+  const cr = LT.rise(t, 9.45, { bounce: 0.2, omega: 16, dist: 16, s0: 1, ds: 0 });
+  P.set('credit', { x: (W - (credit.offsetWidth || 700)) / 2, y: 910, op: cr.op });
+
+  $('hud').textContent = 't=' + t.toFixed(3);
+}
+
+// ── contract ──────────────────────────────────────────────────────────────
+window.__frames = () => P.frames();
+window.__clock = async t => { paint(t); await Promise.all([]); return true; };
+window.__travel = (a, b) => P.travel(a, b, window.__clock);
+window.__events = () => {
+  const ev = [{ t: 0.28, kind: 'air', gain: 0.45 }, { t: 1.15, kind: 'wood', gain: 0.9 }];
+  for (let t = 0.42; t < 1.05; t += 0.062) ev.push({ t, kind: 'tick', gain: 0.22, pan: (t - 0.7) * 2 });
+  [1.95, 2.12, 2.29].forEach((t, i) => ev.push({ t, kind: 'wood', gain: 0.85, pan: (i - 1) * 0.6 }));
+  ev.push({ t: 4.42, kind: 'glass', gain: 0.35 });
+  for (let i = 0; i < 4; i++) ev.push({ t: 4.78 + i * 0.26, kind: 'tick', gain: 0.3, pan: -0.6 + i * 0.4 });
+  ev.push({ t: 6.6, kind: 'riser', gain: 0.5 });
+  for (let i = 0; i < 8; i++) ev.push({ t: 6.62 + i * 0.045, kind: 'glass', gain: 0.22, pan: (i - 4) * 0.2 });
+  [8.0, 8.18, 8.36, 8.54].forEach((t, i) => { ev.push({ t, kind: 'sub', gain: 0.95 }); ev.push({ t, kind: 'wood', gain: 0.5, pan: i % 2 ? 0.3 : -0.3 }); });
+  ev.push({ t: 9.2, kind: 'air', gain: 0.4 });
+  ev.push({ t: 11.35, kind: 'wood', gain: 0.4 });
+  return ev;
+};
+window.__ready = (async () => {
+  if (window.LOOK) await window.LOOK.ready;
+  await document.fonts.ready;
+  await paint(0);
+})();
+const q = new URLSearchParams(location.search);
+if (q.has('hud')) $('hud').style.display = 'block';
+if (q.has('t')) window.__ready.then(() => window.__clock(parseFloat(q.get('t'))));
+if (q.has('play')) window.__ready.then(() => { const t0 = performance.now(); (function loop() { window.__clock(((performance.now() - t0) / 1000) % DUR); requestAnimationFrame(loop); })(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>longtake · gallery</title>
+<style>
+:root{--ground:#10141a;--deep:#070a0e;--card:#171d26;--line:#28303c;--mute:#93a0b4;--ink:#e9eef6;--accent:#c8ff4d;--accent2:#ff8a5c}
+html,body{margin:0;background:#07090c;color:var(--ink);font:15px system-ui,sans-serif}
+#wrap{width:100vw;height:56.25vw;max-height:100vh;position:relative;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;background:var(--ground)}
+#nav{position:fixed;left:0;right:0;bottom:0;padding:10px 14px;background:#000a;display:flex;gap:8px;flex-wrap:wrap;font:12px ui-monospace,monospace}
+#nav a{color:#9fb0c4;text-decoration:none;border:1px solid #24303c;border-radius:999px;padding:4px 10px}
+#nav a.on{color:#0b0e12;background:var(--accent);border-color:var(--accent)}
+#cap{position:absolute;left:24px;bottom:64px;font:12px ui-monospace,monospace;color:var(--mute)}
+.card{background:linear-gradient(150deg,#22323e,#121a22);border:1px solid #2c3a46;border-radius:14px;overflow:hidden}
+.bar{background:var(--accent);border-radius:2px}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage"></div></div>
+<div id="cap"></div>
+<div id="nav"></div>
+<script src="../lib/anim.js"></script>
+<script src="../lib/paint.js"></script>
+<script>
+const W = 1920, H = 1080;
+const stage = document.getElementById('stage');
+const P = LTX.mount(stage);
+const fit = () => { stage.style.transform = `scale(${innerWidth / W})`; };
+addEventListener('resize', fit); fit();
+
+const mk = (tag, cls, html = '') => { const d = document.createElement(tag); if (cls) d.className = cls; d.innerHTML = html; return d; };
+const word = (s, size = 130) => { const d = mk('div', '', s); d.style.cssText += `font:300 ${size}px/1 "Fraunces",Georgia,serif;letter-spacing:-.02em;white-space:nowrap`; return d; };
+const bar = () => mk('div', 'bar');
+
+// every demo: {dur, note, build(), draw(t)}
+const DEMOS = {
+  rise: {
+    dur: 4, note: 'LT.rise — a word lands, opacity leads the spring',
+    build() { this.el = word('every beat is carried', 96); this.sp = [...this.el.textContent].map(ch => { const s = mk('span', '', ch === ' ' ? '&nbsp;' : ch); s.style.display = 'inline-block'; return s; }); this.el.innerHTML = ''; this.sp.forEach(s => this.el.appendChild(s)); P.add('w', this.el, { w: 1600, h: 120 }); },
+    draw(t) { P.set('w', { x: 200, y: 470 }); this.sp.forEach((s, i) => { const p = LT.rise(t, 0.2 + i * 0.06); s.style.opacity = p.op; s.style.transform = `translateY(${p.y}px) scale(${p.s})`; }); },
+  },
+  drop: {
+    dur: 4, note: 'LT.drop — letters land with squash from their own velocity',
+    build() { this.el = word('longtake', 180); this.sp = [...'longtake'].map(ch => { const s = mk('span', '', ch); s.style.display = 'inline-block'; s.style.transformOrigin = '50% 92%'; return s; }); this.el.innerHTML = ''; this.sp.forEach(s => this.el.appendChild(s)); P.add('w', this.el, { w: 900, h: 200 }); },
+    draw(t) { P.set('w', { x: 480, y: 440 }); this.sp.forEach((s, i) => { const p = LT.drop(t, 0.3, i, { stagger: 0.06 }); s.style.opacity = p.op; s.style.transform = `translateY(${p.y}px) scale(${1 + p.sq * 0.55},${1 - p.sq})`; }); },
+  },
+  morph: {
+    dur: 4, note: 'LT.morph — a chip becomes a card, the card becomes a page',
+    build() { this.el = mk('div', 'card'); P.add('m', this.el, { w: 120, h: 56 }); this.b = mk('div', 'bar'); P.add('b', this.b, { w: 900, h: 3 }); },
+    draw(t) { const k = LT.morph(t, 0.3, 2.6, { x: 720, y: 512, w: 120, h: 56 }, { x: 260, y: 180, w: 1400, h: 700, r: 20 }, { curve: LT.C.snap });
+      P.set('m', { x: k.x, y: k.y, w: k.w, h: k.h, r: k.r, op: 1 });
+      const u = LT.morph(t, 2.7, 3.2, { x: 260, y: 900, w: 1400, h: 4 }, { x: 700, y: 940, w: 520, h: 6 }, { curve: LT.C.snap });
+      P.set('b', { x: u.x, y: u.y, w: u.w, h: u.h, op: 1 }); },
+  },
+  dive: {
+    dur: 4, note: 'LT.dive — the camera pushes into a surface until its inside is the frame',
+    build() {
+      this.plane = mk('div'); this.plane.style.cssText = 'position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0';
+      stage.appendChild(this.plane);
+      this.small = mk('div', 'card'); P.add('s', this.small, { w: 440, h: 280 });
+      this.big = mk('div', 'card'); this.big.style.background = 'linear-gradient(160deg,#2b3f4e,#0e151b)'; P.add('g', this.big, { w: 760, h: 470 });
+      this.plane.appendChild(this.small); this.plane.appendChild(this.big);
+      this.inside = word('inside', 92); P.add('i', this.inside, { w: 500, h: 100 }); this.plane.appendChild(this.inside);
+    },
+    draw(t) {
+      P.set('s', { x: 740, y: 400, w: 440, h: 280 });
+      const d = LT.dive(t, 0.4, 2.1, { x: 740, y: 400, w: 440, h: 280 });
+      const grow = LT.spring(t - 2.0, { bounce: 0.25, omega: 14 });
+      P.set('g', { x: 700, y: 380, w: LT.mix(480, 1000, grow), h: LT.mix(300, 620, grow) });
+      P.set('i', { x: 760, y: 500, op: LT.clamp(grow * 1.4) });
+      this.plane.style.transform = `matrix(${d.matrix.map(v => v.toFixed(4)).join(',')})`;
+    },
+  },
+  shuffle: {
+    dur: 4, note: 'LT.shuffle — an elastic rail; text lags the panel',
+    build() { this.rail = [0, 1, 2, 3].map(() => mk('div', 'card')); this.rail.forEach((el, i) => P.add('p' + i, el, { w: 340, h: 220 })); },
+    draw(t) { const s = LT.shuffle(t, [0.5, 1.1, 1.7, 2.3]); this.rail.forEach((el, i) => { P.set('p' + i, { x: 960 + (i - s.shift) * 380 - 170 + s.wobble, y: 420, w: 340, h: 220, rot: s.rot, sx: s.sx, sy: s.sy }); }); },
+  },
+  wobble: {
+    dur: 4, note: 'LT.sims.wobble — a soft body dented by the pointer',
+    build() { this.cv = mk('canvas'); this.cv.width = 1920; this.cv.height = 1080; P.add('c', this.cv, { w: 1920, h: 1080 });
+      const hand = t => [960 + Math.cos(t * 3.1) * 260, 540 + Math.sin(t * 2.3) * 120];
+      this.hand = hand; this.sim = LT.sims.wobble({ t: 0, out: 4, x: 0, y: 0 }, hand, { C: { x: 960, y: 540 }, R0: 150, reach: 90, dent: 26 }); },
+    draw(t) { const c = this.cv.getContext('2d'); c.clearRect(0, 0, W, H); const r = this.sim.at(Math.min(t, 3.99)); c.fillStyle = '#c8ff4d';
+      c.beginPath(); for (let i = 0; i < r.length; i++) { const th = i / r.length * Math.PI * 2, R = this.sim.R0 * (1 + r[i]); const x = this.sim.C.x + Math.cos(th) * R, y = this.sim.C.y + Math.sin(th) * R; i ? c.lineTo(x, y) : c.moveTo(x, y); } c.closePath(); c.fill();
+      const h = this.hand(t); c.fillStyle = '#fff'; c.beginPath(); c.arc(h[0], h[1], 8, 0, 7); c.fill(); },
+  },
+  camera: {
+    dur: 5, note: 'LT.rig + depth — an operated camera that chases, with a lattice behind',
+    build() { this.cv = mk('canvas'); this.cv.width = 1920; this.cv.height = 1080; P.add('c', this.cv, { w: 1920, h: 1080 });
+      this.box = mk('div', 'card'); P.add('b', this.box, { w: 240, h: 150, depth: -0.3 }); this.box.style.background = 'linear-gradient(150deg,#c8ff4d,#8fbf2f)';
+      this.cam = LT.rig([{ t: 0, x: 760, y: 460, zoom: 1.08 }, { t: 1.4, x: 1000, y: 600, zoom: 1.22, curve: LT.C.glide }, { t: 2.4, x: 1300, y: 420, zoom: 1.0, curve: LT.C.whip }, { t: 3.6, x: 940, y: 540, zoom: 1.35 }, { t: 4.6, x: 960, y: 540, zoom: 1 }], { float: 1.2 }); },
+    draw(t) { const cam = this.cam(t); P.cam(cam); const c = this.cv.getContext('2d'); c.clearRect(0, 0, W, H);
+      const g = LT.grid(cam, { depth: 1.3, spacing: 64, px: 1.3 }); c.setTransform(...g.matrix); c.fillStyle = 'rgba(147,160,180,.35)';
+      for (let x = g.x0; x <= g.x1; x += g.spacing) for (let y = g.y0; y <= g.y1; y += g.spacing) { c.beginPath(); c.arc(x, y, g.r, 0, 7); c.fill(); }
+      P.set('b', { x: 840, y: 480, w: 240, h: 150, rot: Math.sin(t * 1.7) * 0.08 }); },
+  },
+  belt: {
+    dur: 5, note: 'LT.belt + LT.cloth — a belt that slows its own contents',
+    build() { this.cv = mk('canvas'); this.cv.width = 192; this.cv.height = 240; P.add('c', this.cv, { w: 480, h: 600 }); [1, 2].forEach(i => { const el = mk('div', 'card'); P.add('k' + i, el, { w: 280, h: 380 }); });
+      this.belt = LT.belt({ dur: 5, speed: 240, stop: [2.6, 3.6] }); },
+    draw(t) { const c = this.cv.getContext('2d'); const p = this.belt.at(t); const img = c.createImageData(16, 20);
+      const d = LT.cloth(p.clock, 4, LT.cloth.ramps.moss, { gx: 16, gy: 20 }); img.data.set(d); c.putImageData(img, 0, 0);
+      P.set('c', { x: 720, y: 240, w: 480, h: 600, op: 1 });
+      [1, 2].forEach(i => { const x = ((300 + i * 420 - p.x) % 1600 + 1600) % 1600; P.set('k' + i, { x: 300 + x - 800, y: 300, w: 280, h: 380, op: 1 }); }); },
+  },
+};
+
+const q = new URLSearchParams(location.search);
+const name = q.get('demo') || Object.keys(DEMOS)[0];
+const demo = DEMOS[name] || DEMOS.rise;
+document.getElementById('nav').innerHTML = Object.keys(DEMOS).map(k => `<a href="?demo=${k}${q.has('play') ? '&play' : ''}" class="${k === name ? 'on' : ''}">${k}</a>`).join('');
+document.getElementById('cap').textContent = `${name} — ${demo.note}`;
+demo.build();
+
+const clock = t => { demo.draw(Math.max(0, Math.min(demo.dur - 1e-3, t))); };
+window.__clock = clock;
+window.__travel = (a, b) => P.travel(a, b, __clock);
+window.__ready = (async () => { await document.fonts.ready; clock(0); })();
+if (q.has('t')) __ready.then(() => clock(parseFloat(q.get('t'))));
+if (q.has('play')) __ready.then(() => { const t0 = performance.now(); (function loop() { clock(((performance.now() - t0) / 1000) % demo.dur); requestAnimationFrame(loop); })(); });
+</script>
+</body>
+</html>

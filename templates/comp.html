@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!-- longtake · composition skeleton. Copy next to the film, keep the contract, rewrite the beats. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>longtake · composition</title>
+<style>
+/* A look writes its eight tokens; these are the slate values so the file renders before look.js. */
+:root{--ground:#10141a;--deep:#070a0e;--card:#171d26;--line:#28303c;--mute:#93a0b4;--ink:#e9eef6;--accent:#c8ff4d;--accent2:#ff8a5c;
+  --display:'Fraunces',Georgia,serif;--text:Inter,system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,Menlo,monospace}
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:var(--ground)}
+body{font-family:var(--text);color:var(--ink)}
+#stage{position:absolute;inset:0;overflow:hidden;background:var(--ground)}
+.bar{background:var(--accent);border-radius:2px;will-change:transform,width,height}
+#word{font:300 150px/1 var(--display);letter-spacing:-.02em;white-space:nowrap}
+#word span{display:inline-block;transform-origin:50% 90%}
+#hud{position:absolute;right:12px;bottom:8px;font:12px var(--mono);color:#d33;display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="word"></div>
+  <div id="hud"></div>
+</div>
+<script src="../lib/anim.js"></script>
+<script src="../lib/paint.js"></script>
+<script src="look.js" onerror=""></script>
+<script>
+/* ── contract ────────────────────────────────────────────────────────────────
+ * window.__meta = {dur, fps, w, h, cuts?, mustStay?}   dur is the film length
+ * window.__clock(t) → Promise  draws frame t; resolves after this frame's images decode
+ * window.__ready → Promise     fonts loaded, layers measured, first frame drawn
+ * window.__beats = [{t, carry, hard?, note?}]   what survives each boundary
+ * window.__travel(a, b)        farthest screen travel between two times (sizes the shutter)
+ * window.__events() → [{t, kind, gain?, pan?}]  sound cues, if the film has sound
+ * `?play` runs live, `?t=6.4&hud` pins a frame.
+ * ────────────────────────────────────────────────────────────────────────── */
+const W = 1920, H = 1080, FPS = 30, DUR = 8;
+window.__meta = { dur: DUR, fps: FPS, w: W, h: H, mustStay: {} };
+const { clamp, mix, C, s5 } = LT;
+const P = LTX.mount(document.getElementById('stage'));
+
+// ── layers ─────────────────────────────────────────────────────────────────
+const word = document.getElementById('word');
+for (const ch of 'one take') { const s = document.createElement('span'); s.textContent = ch === ' ' ? '\u00a0' : ch; word.appendChild(s); }
+const LETTERS = [...word.children];
+const rule = document.createElement('div');
+rule.className = 'bar';
+P.add('rule', rule, { key: 'rule', w: 2, h: 44 });
+P.add('word', word, { key: 'word', w: 900, h: 160 });
+
+// ── camera: keys, then a hand ──────────────────────────────────────────────
+const cam = LT.rig([
+  { t: 0.0, x: 960, y: 540, zoom: 1.06 },
+  { t: 1.2, x: 960, y: 540, zoom: 1.0 },
+  { t: 3.2, x: 900, y: 470, zoom: 1.04 },
+  { t: 5.0, x: 960, y: 540, zoom: 1.0 },
+  { t: 5.2, x: 960, y: 540, zoom: 1.0 },      // duplicate keys: a hold, and the float drops out
+  { t: 6.6, x: 960, y: 520, zoom: 1.05 },
+  { t: 7.4, x: 960, y: 540, zoom: 1.0 },
+  { t: 8.0, x: 960, y: 540, zoom: 1.0 },
+], { W, H, float: 0.6, hits: [[1.15, 6, 9]] });
+
+// ── beats ──────────────────────────────────────────────────────────────────
+window.__beats = [
+  { t: 1.15, carry: 'rule', note: 'the caret becomes the rule' },
+  { t: 5.45, carry: 'word', note: 'the letters land on the rule' },
+  { t: 8.0, carry: 'word', hard: true },
+];
+
+const wordW = () => word.getBoundingClientRect().width;
+
+function draw(t) {
+  P.cam(cam(t));
+  // the caret draws, then stretches into a rule
+  const grow = C.snap(LT.prog(t, 1.1, 1.9));
+  const caret = LT.prog(t, 0.2, 0.45);
+  P.set('rule', {
+    x: mix(700, 260, grow), y: mix(470, 700, grow),
+    w: mix(2, 1400, grow), h: mix(44 * caret, 2, grow),
+    r: 1, op: caret > 0 ? 1 : 0,
+  });
+  const ww = wordW();
+  const hudEl = document.getElementById('hud');
+  if (hudEl.style.display === 'block') hudEl.textContent = 't=' + t.toFixed(3);
+  const wk = LT.spring(t - 5.2, { bounce: 0.3, omega: 16 });
+  P.set('word', { x: (W - ww) / 2, y: 380 + (1 - wk) * 90, op: LT.prog(t, 5.12, 5.32), blur: (1 - wk) * 6 });
+  LETTERS.forEach((s, i) => {
+    const d = LT.drop(t, 5.2, i);
+    s.style.opacity = d.op; s.style.transform = `translateY(${d.y.toFixed(1)}px) scale(${(1 + d.sq * 0.6).toFixed(4)},${(1 - d.sq).toFixed(4)})`;
+  });
+}
+
+// ── contract plumbing ───────────────────────────────────────────────────────
+window.__frames = () => P.frames();
+window.__clock = async t => { draw(t); await Promise.all([]); return true; };
+window.__travel = (a, b) => P.travel(a, b, window.__clock);
+window.__events = () => [{ t: 0.25, kind: 'air', gain: 0.5 }, { t: 1.15, kind: 'wood', gain: 0.9 }, { t: 5.2, kind: 'glass', gain: 0.5 }];
+window.__ready = (async () => {
+  if (window.LOOK) await window.LOOK.ready;
+  await document.fonts.ready;
+  await draw(0);
+})();
+const q = new URLSearchParams(location.search);
+if (q.has('hud')) document.getElementById('hud').style.display = 'block';
+if (q.has('t')) window.__ready.then(() => window.__clock(parseFloat(q.get('t'))));
+if (q.has('play')) window.__ready.then(() => { const t0 = performance.now(); (function loop() { window.__clock(((performance.now() - t0) / 1000) % DUR); requestAnimationFrame(loop); })(); });
+</script>
+</body>
+</html>

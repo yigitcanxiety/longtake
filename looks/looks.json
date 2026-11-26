@@ -1,0 +1,147 @@
+{
+  "about": "Starting looks. Eight colour tokens, three faces, all faces OFL and shipped in looks/fonts. A look is picked by name in the concept round; a comp written against the tokens switches by name. Roles: ground is the 70 % of the frame, deep a second ground (vignette, far plane), card surfaces on the ground, line hairlines, mute secondary labels (>= 3:1 on ground), ink type and subject (>= 4.5:1), accent the one colour that means something, accent2 its rare partner.",
+  "tokens": {
+    "ground": "the frame's ground",
+    "deep": "a second ground: vignette edge, far plane, a well under cards",
+    "card": "surfaces sitting on the ground",
+    "line": "hairlines, card edges, lattice",
+    "mute": "labels and secondary text",
+    "ink": "type and the subject",
+    "accent": "the one colour that means something",
+    "accent2": "its partner, used rarely"
+  },
+  "looks": {
+    "slate": {
+      "mood": "night instrument panel: slate ground, bone type, one acid-lime signal",
+      "color": {
+        "ground": "#10141a",
+        "deep": "#070a0e",
+        "card": "#171d26",
+        "line": "#28303c",
+        "mute": "#93a0b4",
+        "ink": "#e9eef6",
+        "accent": "#c8ff4d",
+        "accent2": "#ff8a5c"
+      },
+      "type": {
+        "display": {
+          "face": "Fraunces",
+          "weight": 300,
+          "fallback": "Georgia, serif",
+          "file": "Fraunces.ttf"
+        },
+        "text": {
+          "face": "Inter",
+          "weight": 450,
+          "fallback": "system-ui, sans-serif",
+          "file": "Inter.ttf"
+        },
+        "mono": {
+          "face": "Geist Mono",
+          "weight": 400,
+          "fallback": "ui-monospace, Menlo, monospace",
+          "file": "GeistMono.ttf"
+        }
+      }
+    },
+    "bone": {
+      "mood": "warm gallery paper, near-black type, terracotta accent \u2014 calm, printed",
+      "color": {
+        "ground": "#f4f0e8",
+        "deep": "#e6dfd1",
+        "card": "#fffdf8",
+        "line": "#dbd4c4",
+        "mute": "#6f6858",
+        "ink": "#1b1a17",
+        "accent": "#c8432c",
+        "accent2": "#2f6b4f"
+      },
+      "type": {
+        "display": {
+          "face": "Instrument Serif",
+          "weight": 400,
+          "fallback": "Georgia, serif",
+          "file": "InstrumentSerif.ttf"
+        },
+        "text": {
+          "face": "Instrument Sans",
+          "weight": 500,
+          "fallback": "system-ui, sans-serif",
+          "file": "InstrumentSans.ttf"
+        },
+        "mono": {
+          "face": "Geist Mono",
+          "weight": 400,
+          "fallback": "ui-monospace, Menlo, monospace",
+          "file": "GeistMono.ttf"
+        }
+      }
+    },
+    "ink": {
+      "mood": "near-black void, warm white type, one amber lamp",
+      "color": {
+        "ground": "#0b0b0d",
+        "deep": "#050506",
+        "card": "#141416",
+        "line": "#26262a",
+        "mute": "#9a9a9f",
+        "ink": "#f2efe9",
+        "accent": "#f0a03c",
+        "accent2": "#7c6cff"
+      },
+      "type": {
+        "display": {
+          "face": "Archivo",
+          "weight": 800,
+          "fallback": "system-ui, sans-serif",
+          "file": "Archivo.ttf"
+        },
+        "text": {
+          "face": "Inter",
+          "weight": 400,
+          "fallback": "system-ui, sans-serif",
+          "file": "Inter.ttf"
+        },
+        "mono": {
+          "face": "Geist Mono",
+          "weight": 400,
+          "fallback": "ui-monospace, Menlo, monospace",
+          "file": "GeistMono.ttf"
+        }
+      }
+    },
+    "moss": {
+      "mood": "pale lichen ground, deep green ink, rust counterpoint \u2014 botanical, quiet",
+      "color": {
+        "ground": "#eef1e6",
+        "deep": "#dde3d2",
+        "card": "#f8faf2",
+        "line": "#cdd5c2",
+        "mute": "#5f6b5c",
+        "ink": "#16211a",
+        "accent": "#2f6b4f",
+        "accent2": "#b4552f"
+      },
+      "type": {
+        "display": {
+          "face": "Fraunces",
+          "weight": 500,
+          "fallback": "Georgia, serif",
+          "file": "Fraunces.ttf"
+        },
+        "text": {
+          "face": "Instrument Sans",
+          "weight": 450,
+          "fallback": "system-ui, sans-serif",
+          "file": "InstrumentSans.ttf"
+        },
+        "mono": {
+          "face": "Geist Mono",
+          "weight": 400,
+          "fallback": "ui-monospace, Menlo, monospace",
+          "file": "GeistMono.ttf"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+# runtime
+playwright
+numpy
+pillow
+scipy
+# looks: font subsetting
+fonttools
+brotli
+# look sheets, probe plots
+matplotlib

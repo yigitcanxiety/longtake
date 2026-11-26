@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+_frames/
+.render.json
+.DS_Store
+*.log
